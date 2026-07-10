@@ -1,0 +1,142 @@
+Role: Software Engineer Manager, AI/ML Platforms
+Company: Home Depot
+Location: Remote
+
+With a career at The Home Depot, you can be yourself and also be part of something bigger.
+
+Position Purpose:
+
+As a Software Engineer Manager, you will have the opportunity to contribute to the development of innovative products while supporting the growth of the next generation of engineering talent. In this role, you will be responsible for driving strategic technology decisions, building scalable and resilient systems, and delivering solutions that align with organizational  objectives, including retail and promotional pricing as well as pricing optimization initiatives. 
+ 
+In addition, you will collaborate with strategic vendors to ensure that third-party tools and applications are accessible and effectively leveraged by product teams. You will also play a key role in guiding the adoption of AI/ML-driven solutions to enable data-driven decision-making and enhance automation across the organization.
+
+
+Key Responsibilities:
+
+30% Delivery & Execution:
+Collaborates and pairs with product team members (UX, engineering, and product management) to create secure, reliable, scalable software solutions
+Documents, reviews and ensures that all quality and change control standards are met
+Writes custom code or scripts to automate infrastructure, monitoring services, and test cases
+Works with vendors and partners for the successful implementation of critical tooling and platforms
+Creates meaningful dashboards, logging, alerting, and responses to ensure that issues are captured and addressed proactively
+Contributes to enterprise-wide tools to drive destructive testing, automation, and engineering empowerment
+Evaluates new technologies for adoption across the enterprise
+Participates in and leads review board sessions to drive consistency across the enterprise
+Fills in on product teams for engineers who are out of the office
+10% Support & Enablement:
+Fields questions from engineers, product teams, or support teams
+Monitors tools and participates in conversations to encourage collaboration across product teams
+Provides application support for software running in production
+Acts as a technical escalation point for the engineers on the team
+50% People:
+Provides leadership, mentoring, and coaching to Software Engineers
+Attracts, retains, and develops top talent to build a world class Software Engineering Team
+Conducts annual and mid-year reviews by reviewing individual development plans and team feedback
+Fosters collaboration with team members to drive consistency across product teams, and finds opportunities to expose engineers to career interests
+Acts as a proponent of modern software development practices
+Guides team members in strategy, alignment, analysis, and execution tasks within and across product teams
+Participates in and contributes to learning activities around modern software design and development core practices (communities of practice)
+10% Learning:
+Learns, through reading, tutorials, and videos, new technologies and best practices being used within other technology organizations
+Builds relationships with technology leaders at other companies to learn best practices and elegant solutions to common problems
+
+Direct Manager/Direct Reports:
+
+Typically reports to the Software Engineer Sr. Manager, Technology Director or Sr. Director.
+
+Travel Requirements:
+
+Typically requires overnight travel 5% to 20% of the time.
+
+Physical Requirements:
+
+Most of the time is spent sitting in a comfortable position and there is frequent opportunity to move about. On rare occasions there may be a need to move or lift light articles.
+
+Working Conditions:
+
+Located in a comfortable indoor area. Any unpleasant conditions would be infrequent and not objectionable.
+
+Minimum Qualifications:
+
+Must be eighteen years of age or older.
+Must be legally permitted to work in the United States.
+Mastery of an object oriented programming language (preferably Java)
+Must be legally permitted to work in the United States
+
+Preferred Qualifications:
+
+7-9 years of relevant work experience 
+• Mastery of a modern programming language (preferably java & Python) 
+
+Experience building, productionizing, and operating AI/ML systems, statistical models, recommendation systems, personalization platforms, or Generative AI solutions at enterprise scale 
+
+Hands-on experience with big data platforms, distributed data processing, and large-scale data pipelines 
+• Experience with orchestration and workflow tools such as Apache Airflow, Cloud Composer, or similar platforms 
+
+Experience with MLOps practices, including model deployment, monitoring, retraining workflows, feature pipelines, experimentation, and production model governance 
+• Experience working with cloud platforms, preferably Google Cloud Platform, including services such as BigQuery, Vertex AI, Dataflow, Dataproc, Pub/Sub, Cloud Storage, and Kubernetes 
+• Experience designing and scaling high-throughput, low-latency, distributed systems that support customer-facing recommendations, search, personalization use cases 
+
+Strong SQL skills and experience working with relational, NoSQL, and analytical data stores 
+• Experience integrating AI/ML models into production applications, APIs, data products, or decisioning platforms 
+• Experience with experimentation platforms, A/B testing, feature evaluation, ranking systems, or optimization techniques 
+• Experience with retail, ecommerce, search, personalization, or recommendation platforms preferred 
+• Experience using AI agents or developer productivity tools to improve engineering effectiveness, accelerate delivery, and raise team quality 
+• Strong understanding of modern software delivery practices, CI/CD pipelines, observability, automated testing, and production readiness 
+• Proficient in troubleshooting complex distributed systems, analyzing logs, monitoring system health, and resolving production issues 
+• Ability to quickly understand complex systems, identify technical risks, and guide teams toward practical solutions 
+• Experience mentoring engineers, growing technical talent, and reinforcing strong software engineering fundamentals 
+• Experience managing team execution, balancing workloads, setting priorities, and delivering through ambiguity 
+• Experience working across product, data science, analytics, architecture, infrastructure, and business stakeholders in a matrixed environment 
+• Experience translating high-level strategy into technical roadmaps, delivery plans, and measurable outcomes 
+• Experience managing vendor relationships, third-party platforms, or external technology partners when needed 
+
+ 
+
+
+Minimum Education:
+
+The knowledge, skills and abilities typically acquired through the completion of a bachelor's degree program or equivalent degree in a field of study related to the job.
+
+Preferred Education:
+
+No additional education
+
+Minimum Years of Work Experience:
+
+7
+
+Preferred Years of Work Experience:
+
+ 5 years of experience data and ML space
+
+Minimum Leadership Experience:
+
+None
+
+Preferred Leadership Experience:
+
+None
+
+Certifications:
+
+None
+
+Competencies:
+
+Attracts Top Talent: Attracting and selecting the best talent to meet current and future business needs
+Balances Stakeholders: Anticipating and balancing the needs of multiple stakeholders
+Builds Effective Teams: Building strong-identity teams that apply their diverse skills and perspectives to achieve common goals
+Business Insight: Applying knowledge of business and the marketplace to advance the organization's goals
+Collaborates: Building partnerships and working collaboratively with others to meet shared objectives
+Communicates Effectively: Developing and delivering multi-mode communications that convey a clear understanding of the unique needs of different audiences
+Develops Talent: Developing people to meet both their career goals and the organization's goals
+Drives Engagement: Creating a climate where people are motivated to do their best to help the organization achieve its objectives
+Drives Vision and Purpose: Painting a compelling picture of the vision and strategy that motivates others to action
+Manages Ambiguity: Operating effectively, even when things are not certain or the way forward is not clear
+Organizational Savvy: Maneuvering comfortably through complex policy, process, and people-related organizational dynamics
+Situational Adaptability: Adapting approach and demeanor in real time to match the shifting demands of different situations
+For California, Colorado, Connecticut, Rhode Island, Nevada, New York City, Ithaca (NY), Westchester County (NY), and Washington residents:
+ 
+
+The pay range for this position is between $140,000.00 - $240,000.00

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tailor resume content to a job description using Claude API directly.
+"""Tailor resume content to a job description using the claude CLI.
 
 Uses parallel sub-agents — each responsible for one resume section — so that
 every section gets a focused prompt rather than one monolithic call.
@@ -13,12 +13,9 @@ The model is instructed to only use facts from the profile — no invented conte
 import json
 import os
 import re
+import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
-
-import anthropic
-
-MODEL_ID = "claude-sonnet-4-6"
 
 SYSTEM_PROMPT = """\
 You are an expert resume writer. Your task is to tailor a technology executive's \
@@ -62,6 +59,13 @@ Return JSON:
 
     "summary": """\
 Write a 3-bullet executive summary tailored to this JD. Use only facts from the profile.
+If the JD is in financial services, fintech, or auto finance:
+- Explicitly reference any financial services domain exposure in the profile \
+  (e.g. loan underwriting, account management, SOX-compliant environments, payment processing, \
+  credit card platforms, regulated financial systems) to establish domain credibility.
+- Use domain vocabulary that mirrors the JD: "customer account servicing," \
+  "financial operations platforms," "regulated financial services," or equivalent — \
+  only where the profile supports it.
 Return JSON:
 {{"summary": ["<bullet 1>", "<bullet 2>", "<bullet 3>"]}}
 """,
@@ -80,6 +84,20 @@ If the JD is an Individual Contributor (IC) role — i.e. it emphasises hands-on
 engineering delivery, or technical depth over people management — reorder bullets within \
 each role to lead with hands-on technical contributions (architecture, coding, CI/CD, \
 platform engineering) and place management/budget/vendor bullets at the end.
+If the JD is in financial services, fintech, or auto finance:
+- For each role, foreground any bullets that reference financial domain work: \
+  loan underwriting, account management, payment processing, SOX compliance, \
+  regulatory controls, PCI DSS, credit platforms, or financial operations systems.
+- In older roles (e.g. Cognizant Principal Lead) where financial services work exists, \
+  ensure those bullets appear first within that role's list to maximize domain signal.
+If the JD is an AI/ML platform or data engineering role:
+- Restate any machine learning model training, deployment, pipeline, or monitoring work \
+  using explicit MLOps vocabulary: "MLOps", "model deployment", "model monitoring", \
+  "feature pipelines", "model retraining", "production model governance" — \
+  but ONLY where the profile's underlying work justifies the term.
+- When the profile references Databricks, Kafka, or similar pipeline tools in the context \
+  of ML or data workflows, surface them as workflow orchestration / pipeline orchestration \
+  to address JD requirements for Airflow-style tooling.
 Return JSON:
 {{"experience": [
   {{"title": "<exact title>", "company": "<exact company>", "dates": "<exact dates>",
@@ -93,6 +111,22 @@ Reorder skill categories to foreground JD-relevant ones first. \
 CRITICAL: Do NOT omit any skill, framework, tool, or technology listed in the profile — \
 include every item even if not directly JD-relevant. Preserve exact names (e.g. Angular, \
 ReactJS must both appear if both are in the profile).
+Cloud platform ordering rule: \
+- If the JD specifies GCP as the preferred or primary cloud, list GCP services FIRST \
+  in the Cloud entry, before AWS and Azure.
+- If the JD specifies AWS as preferred, list AWS first. \
+- Default order (no preference stated): AWS, Azure, GCP.
+Orchestration surface rule: \
+- If the JD requires workflow orchestration tools (Apache Airflow, Cloud Composer, \
+  Prefect, etc.), scan the profile for any tools that perform equivalent pipeline \
+  orchestration (Databricks Workflows, Kafka-based pipelines, AWS Step Functions, \
+  Azure Data Factory, etc.) and surface them explicitly under a \
+  "Orchestration & Pipelines" or "Data Pipelines" skill entry. \
+  Do NOT invent tools not present in the profile.
+SQL visibility rule: \
+- If the JD calls out SQL as a required or preferred skill, ensure "SQL" appears \
+  explicitly in the skills output (in addition to any database names). \
+  The profile lists Oracle, MySQL, PostgreSQL — extract "SQL" as a named skill.
 Return JSON:
 {{
   "technical_skills": ["<bold label>: <skill list>", ...],
@@ -141,15 +175,20 @@ def _call_section(section: str, profile: str, jd: str) -> tuple[str, dict]:
         task=SECTION_PROMPTS[section],
     )
 
-    client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY from environment
-    message = client.messages.create(
-        model=MODEL_ID,
-        max_tokens=2048,
-        system=SYSTEM_PROMPT,
-        messages=[{"role": "user", "content": prompt}],
+    result = subprocess.run(
+        [
+            "claude", "-p", prompt,
+            "--system-prompt", SYSTEM_PROMPT,
+            "--output-format", "text",
+        ],
+        capture_output=True,
+        text=True,
+        timeout=300,
     )
+    if result.returncode != 0:
+        raise RuntimeError(result.stderr.strip() or f"claude CLI exited {result.returncode}")
 
-    raw = message.content[0].text
+    raw = result.stdout
     return section, _parse_json(raw)
 
 

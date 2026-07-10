@@ -46,43 +46,40 @@ billion-dollar platforms.
 
 ## Professional Experience
 - Organization: Southern Glazers Wine & Spirits
-    - Title: Director - Digital Engineering
+    - Title: Director, Digital Engineering
     - Duration: May 2021 to Present
     - Roles & Responsibilities:
     **Enterprise Strategy:**
         - Architected and executed comprehensive IT and cloud strategies to scale high-volume B2B commerce platforms, ensuring 24-7 reliability and global performance.
+        - AI-First Engineering leadership by architecting and owning AI product enablement, intelligent automation, agentic workflows, RAG pipelines, governance and guardrails.
         - Standardized the enterprise technology stack by leading the cross-functional rollout of CDN, IAM, and observability platforms, enhancing security and operational visibility.
         - Orchestrated high-stakes RFP processes, negotiating multi-year vendor contracts exceeding $5M annually to optimize ROI and ensure vendor alignment with long-term business goals
         - Managed multi-million dollar CapEx and OpEx budgets, optimizing resource allocation and vendor ecosystems to drive operational efficiency and long-term scalability.      
     **Global Leadership:**
-        - Directed multi-disciplinary engineering and architecture organizations,
-          fostering a culture of excellence to deliver mission-critical, high-availability systems.
-        - Spearheaded transformation with $3M annual talent and 
-          staffing  portfolio,   strategically balancing internal expertise with high-impact vendor partnerships to accelerate delivery.
-        - Championed talent acquisition and development, partnering with HR to design
-          robust career frameworks and scale high-performing global teams.
-    **Modernization:**
+        - Directed multi-disciplinary engineering and architecture organizations, fostering a culture of excellence to deliver mission-critical, high-availability systems.
+        - Spearheaded transformation with $3M annual talent and staffing  portfolio, strategically balancing internal expertise with high-impact vendor partnerships to accelerate delivery.
+        - Championed talent acquisition and development, partnering with HR to design robust career frameworks and scale high-performing global teams.
+        - Lead, coach and scale a global engineering organization including multiple engineering manager and senior ICs across the globe.
+    **Modernization & AI:**
         - Spearheaded cloud-native transformation initiatives, optimizing architecture, security protocols, and system performance to meet evolving market demands.
-        - Pioneered AI-driven operational excellence, integrating foundational models
-        and agentic workflows (RAG, MCP) to boost engineering velocity and sales
-        productivity.
-        - Cultivated a culture of innovation through enterprise-wide hackathons and
-        workshops, successfully accelerating the adoption of cutting-edge AI tools and frameworks.
+        - Enhanced developer experience through automation, self-service capabilities by rolling out full-fledged IDP (Integrated Developer Platform)
+        - Pioneered AI-driven operational excellence, integrating foundational models and agentic workflows (RAG, MCP) to boost engineering velocity and sales productivity.
+        - Championed AI powered tools & harness such as claude code, github copilot, crew ai organaziations across team to leverage LLM's such as sonnet, opus, Haiku, gpt etc into engineering process 
+        - Directed the end-to-end development, training, and production deployment of advanced machine learning models (AdaBoost, XGBoost), scaling predictive analytics capabilities to maximize inventory replenishment efficiency across warehouse operations."
+        - Architected the enterprise data sharing platform and streaming infrastructure, engineering robust pipelines across Databricks, Apache airflow and Redshift while leveraging Kafka to stream System of Record (SOR) data across distributed environments.
+        - Cultivated a culture of innovation through enterprise-wide hackathons and workshops, successfully accelerating the adoption of cutting-edge AI tools and frameworks.
+        - Orchestrated the development and production deployment of advanced ML recommendation engines, building robust data pipelines that scaled predictive product matching based on historic buying patterns.
         - Orchestrated the organizational pivot from a reactive AMS model to a proactive SRE framework, driving a 35% reduction in Mean Time to Recovery (MTTR) and achieving 99.99% availability for the $4B e-commerce platform; tracked and improved DORA metrics (deployment frequency, change failure rate, lead time for changes, and MTTR) across the engineering organization.
-        - Designed and built payment soutions (auto pay) for B2B customers integrating with various payment providers
+        - Designed and built payment soutions (auto pay) for B2B customers integrating with various payment providers, rolled out scalable distributed order management platform B2B commerce using SAP Commerce cloud v2 (Hybris)
+        - Full stack engineering leader delivered robust user experience at scale by building design systems, micro-frontend architectures, A/B test and toggle frameworks
     **Executive Partnership:**
-        - Served as a strategic advisor to C-suite and cross-functional leaders, aligning technology roadmaps with enterprise investment planning and long-term business objectives.
-        - Championed FinOps maturity, establishing transparent cloud consumption
-        governance that empowered financial leaders with accurate forecasting and
-        budget control.
-        - Fortified enterprise resilience by partnering with security leadership to
-        implement rigorous governance and IAM policies across the global data and
-        application landscape.
-        - Provided critical technical due diligence and strategic guidance for M&A
-        activities, ensuring seamless technology integration and value realization for Southern Glazers.
+        - Served as a strategic advisor to C-suite and cross-functional leaders, aligning technology roadmaps, with enterprise investment planning and OKR alignments.
+        - Championed FinOps maturity, establishing transparent cloud consumption governance that empowered financial leaders with accurate forecasting and budget control.
+        - Fortified enterprise resilience by partnering with security leadership to implement rigorous governance and IAM policies across the global data and application landscape.
+        - Provided critical technical due diligence and strategic guidance for M&A activities, ensuring seamless technology integration and value realization for Southern Glazers.
 
 - Organization: Neiman-Marcus Group
-    - Title: Principal Engineer & Platform Leader
+    - Title: Principal Engineer
     - Duration: Oct 2018 to May 2021
     - Roles & Responsibilities:
         - Reliability & Scale: Directed SRE and DevOps teams to enhance operational maturity and platform scalability.
@@ -96,10 +93,14 @@ billion-dollar platforms.
         - Designed and implemented various payment integrations for ecommerce platform including PayPal, Aurus, Worldpay and OMS with PCI-compliant, headless architecture.
         - Lifted checkout conversion by 2% by reducing integration errors, real-time data consistency, and transparent communication across payments, warehouse, OMS, and pricing systems.
         - Lift in driving customer traffic by 5% to web site by improving SEO and modernizing search experience
-        - Designed and built integration framework with various third parties including payment providers and OMS with PCI compliant
+        - Designed and built integration framework with various third parties including payment providers such as world pay, Paypal and OMS with PCI compliant
+        - Led scalable front end architecture / micro front-ends using React, React JS, React Native, NodeJS.
+        - Delivered robust A/B testing framework to evaluate feature for ecommerce features, toggle framework, analytics implemnetation using Adobe, Optimizely etc.,
+        - Architected and Led the migration of search platform from Endeca to modernized platform such as Bloom reach using composable architecture
+        - Integrated third party recommendation engines into commerce platform to boost conversion
 
 - Organization: Cognizant
-    - Title: Associate Director - Engineering
+    - Title: Associate Director, Engineering
     - Duration: Apr 2010 to Aug 2018
     - Roles & Responsibilities:
         - Enterprise Digital Modernization: Partnered with C-suite executives to scale digital commerce initiatives, successfully driving the enterprise-wide adoption of Agile and DevOps methodologies for Fortune 500 retail portfolios.
@@ -108,9 +109,10 @@ billion-dollar platforms.
         - Operational Excellence & Efficiency: Championed the transition from traditional waterfall to Agile (SAFe, Scrum, Kanban) and DevOps models, drastically increasing production deployment velocity and stakeholder transparency.
         - High-Velocity Solution Delivery: Established a customized delivery framework (TRAIN) that accelerated project lifecycles, utilizing resource rationalization and automation to optimize costs without compromising quality.
         - Strategic Talent Stewardship: Directed the global recruitment, grooming, and retention of top-tier engineering talent, establishing a robust Subject Matter Expert (SME) network to facilitate knowledge sharing across the organization.
+        - For the pharmacy customer (walgreens), modernized the ecommerce platforms, re-engineered and architected the commerce platform as cloud native services
 
 - Organization: Atos Origin
-    - Title: Manager - Engineering & Projects
+    - Title: Manager, Engineering & Projects
     - Duration: Oct 2009 – Apr 2010
     - Roles & Responsibilities:
         - Global Delivery: Directed cross-functional teams across three continents to
@@ -118,14 +120,14 @@ billion-dollar platforms.
         - Architectural Velocity: Spearheaded modular SOA architectures that significantly accelerated time-to-market for digital features.
 
 - Organization: Mahindra Satyam
-    - Title: Director - Technology
+    - Title: Director-Technology
     - Duration: Jan 2007 – Oct 2009
     - Roles & Responsibilities:
         - Financial Accountability: Managed multimillion-dollar budgets for Ford and the World Bank, ensuring project profitability and optimal resource allocation.
         - Talent Development: Championed engineering excellence and internal mentorship programs, significantly increasing employee retention
 
 - Organization: Cognizant
-    - Title:  Principal / Technology Lead
+    - Title:  Principal Lead
     - Duration: Sep 2002 – Jan 2007
     - Roles & Responsibilities:
         - Financial Services Engineering: Technical lead for AMEX Small Business Unit — designed and implemented loan underwriting applications (Java, J2EE, MQ, WebLogic) in a SOX-compliant, audit-controlled environment.
@@ -165,20 +167,20 @@ billion-dollar platforms.
     - Change & Release Management (Iterative, Feedback loops, A/B test rollouts, Blue/Green/Canary deploy )
 
 - Technology & Tools
-    - **Cloud:** AWS (EC2, EKS, Fargate, S3, Lambda, API Gateway, DynamoDB, ALB Route53, SQS, Kinesis, Cloud Formation, Bedrock) Azure (AKS, Cosmos DB, Service Bus, Event Grid, Functions),   
+    - **Cloud:** AWS (EC2, EKS, Fargate, S3, Lambda, API Gateway, DynamoDB, ALB Route53, SQS, Kinesis, Cloud Formation, Bedrock) Azure (AKS, Cosmos DB, Service Bus, Event Grid, Functions), GCP (Compute Engine, GKE, Cloud Run, Cloud SQL, Cloud Storage, Pub/Sub, Big Query, Vertex AI)
     - **Architecture:** Cloud-Native, Microservices, SOA, Composable Commerce, Headless Architecture, API-first
     - **Delivery:** Agile, Scrum, Kanban
     - **Languages:** Java, JavaScript, TypeScript, Python
-    - **Framework:** ReactJS, Spring, Angular
+    - **Framework:** ReactJS, Spring, Spring Boot, ReactJS, React Native, Redux, Angular, Next JS
     - **IaC:** Terraform, CloudFormation, GitHub actions
-    - **Security:** Network, Infrastructure, Data, cloud, pipeline, Layer 7, Fraud Detection & Monitoring, IAM, IDP, CDN
-    - **Platforms:** Kubernetes, Docker, SAP Hybris, ATG
+    - **Security:** Network, Infrastructure, Data, cloud, pipeline, Layer 7, Fraud Detection & Monitoring, IAM, IDP, CDN (Fastly, Akamai)
+    - **Platforms:** Kubernetes, Docker, SAP Commerce Cloud V2 (Hybris), ATG Commerce, SOLR, Coveo, IBM Sterling Commerce
     - **Data & AI:** Analytics, Machine Learning, GenAI, RAG, Agentic Frameworks, Deep Learning, Neural Networks, CNN, NLP, Langchain & Lang graph, Crew AI, Claude
     - **API:** GraphQL, REST, SOAP / Webservices
     - **Dev.Ops** Docker, Jenkins, GitHub, GitHub Actions
     - **Database** Oracle, SQLServer, MySQL, PostgresSQL, RDS
     - **Observability** Splunk, Dynatrace, ELK, Grafana, Quantum Metrics
-    - **Event streams** Kafka, RabbitMQ, Patterns (CDC, Event sourcing, CQRS, Pub/Sub, SAGA)
+    - **Event streams** Apache Kafka, RabbitMQ, Patterns (CDC, Event sourcing, CQRS, Pub/Sub, SAGA)
 
 ## Certifications
 - AWS Certified Solution Architect
@@ -194,7 +196,7 @@ billion-dollar platforms.
 - Bachelor of Science – Madras University, India, Graduated Year 1997
 
 ## Contact
-- **Place:** Dallas, TX
+- **Place:** Irving, TX
 - **Email:** tamizhmani2000@gmail.com
 - **Ph:** (201) 290-9366
 - **Social:** linkedin.com/in/tamizh

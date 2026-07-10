@@ -63,8 +63,11 @@ def run(template_name, layout, jd_source=None):
         print(f"Unknown template '{template_name}'. Available: {', '.join(TEMPLATES)}")
         sys.exit(1)
 
+    import reviewer
+
     # Optionally tailor content to JD
     content = None
+    jd_text = None
     if jd_source:
         import jd_loader
         import jd_tailor
@@ -74,6 +77,7 @@ def run(template_name, layout, jd_source=None):
 
     layouts_to_run = list(template.keys()) if layout == "both" else [layout]
     docx_done = False
+    docx_path = None
 
     for lyt in layouts_to_run:
         if lyt not in template:
@@ -87,8 +91,15 @@ def run(template_name, layout, jd_source=None):
 
         if not docx_done:
             docx_mod = load_module(docx_gen_path)
-            docx_mod.build(content)
+            docx_path = docx_mod.build(content)
             docx_done = True
+
+    # One review per run, based on the DOCX (PDFs are layout renders of the same content)
+    if docx_path:
+        try:
+            reviewer.review(content, jd_text, docx_path, layouts_to_run)
+        except Exception as exc:
+            print(f"  [warn] Review generation failed: {exc}")
 
 
 if __name__ == "__main__":

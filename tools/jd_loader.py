@@ -9,25 +9,79 @@ import re
 import sys
 
 
+def _fetch_url(url: str) -> str:
+    """Fetch URL content using curl (respects system/corporate CA certs) or requests."""
+    import subprocess
+    ca_bundle = os.environ.get("REQUESTS_CA_BUNDLE") or os.environ.get("SSL_CERT_FILE")
+    cmd = [
+        "curl", "-sL", "--max-time", "30",
+        "-A", (
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/124.0.0.0 Safari/537.36"
+        ),
+    ]
+    if ca_bundle:
+        cmd += ["--cacert", ca_bundle]
+    cmd.append(url)
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=35)
+    if result.returncode != 0:
+        sys.exit(f"Failed to fetch URL: {result.stderr.strip()}")
+    return result.stdout
+
+
 def _load_url(url: str) -> str:
     try:
-        import requests
         from bs4 import BeautifulSoup
     except ImportError:
-        sys.exit("Missing dependencies: pip install requests beautifulsoup4")
+        sys.exit("Missing dependencies: pip install beautifulsoup4")
 
-    headers = {"User-Agent": "Mozilla/5.0 (compatible; resume-builder/1.0)"}
-    resp = requests.get(url, headers=headers, timeout=15)
-    resp.raise_for_status()
+    html = _fetch_url(url)
+    soup = BeautifulSoup(html, "html.parser")
 
-    soup = BeautifulSoup(resp.text, "html.parser")
-
-    # Remove navigation, scripts, styles, footers
+    # Remove boilerplate elements
     for tag in soup(["script", "style", "nav", "footer", "header", "aside"]):
         tag.decompose()
 
+    # LinkedIn-specific: extract only the job details section to avoid noise
+    if "linkedin.com" in url:
+        text = _extract_linkedin_jd(soup)
+        if text:
+            return _clean(text)
+
     text = soup.get_text(separator="\n")
     return _clean(text)
+
+
+def _extract_linkedin_jd(soup) -> str:
+    """Extract only the actual job description text from a LinkedIn job page."""
+    # Try known LinkedIn job-description containers
+    selectors = [
+        {"class": re.compile(r"description__text", re.I)},
+        {"class": re.compile(r"jobs-description", re.I)},
+        {"class": re.compile(r"job-details", re.I)},
+    ]
+    for attrs in selectors:
+        node = soup.find(attrs=attrs)
+        if node:
+            return node.get_text(separator="\n")
+
+    # Fallback: grab everything up to "Similar jobs" or "People also viewed"
+    full_text = soup.get_text(separator="\n")
+    cutoff = re.search(
+        r"\n(Similar jobs|People also viewed|Show more jobs|Explore top content)",
+        full_text,
+        re.I,
+    )
+    if cutoff:
+        full_text = full_text[: cutoff.start()]
+
+    # Also trim anything before "About the Role" or "Job Description"
+    start = re.search(r"\n(About the Role|Job Description|About This Role)", full_text, re.I)
+    if start:
+        full_text = full_text[start.start():]
+
+    return full_text
 
 
 def _load_file(path: str) -> str:
