@@ -64,6 +64,7 @@ def run(template_name, layout, jd_source=None):
         sys.exit(1)
 
     import reviewer
+    import job_tracker
 
     # Optionally tailor content to JD
     content = None
@@ -78,6 +79,7 @@ def run(template_name, layout, jd_source=None):
     layouts_to_run = list(template.keys()) if layout == "both" else [layout]
     docx_done = False
     docx_path = None
+    pdf_paths = {}  # lyt -> path
 
     for lyt in layouts_to_run:
         if lyt not in template:
@@ -87,7 +89,9 @@ def run(template_name, layout, jd_source=None):
         print(f"\n── Generating {template_name} / {lyt} ──")
 
         pdf_mod = load_module(pdf_gen_path)
-        pdf_mod.build(content)
+        pdf_result = pdf_mod.build(content)
+        if isinstance(pdf_result, str):
+            pdf_paths[lyt] = pdf_result
 
         if not docx_done:
             docx_mod = load_module(docx_gen_path)
@@ -95,11 +99,29 @@ def run(template_name, layout, jd_source=None):
             docx_done = True
 
     # One review per run, based on the DOCX (PDFs are layout renders of the same content)
+    review_path = None
     if docx_path:
         try:
-            reviewer.review(content, jd_text, docx_path, layouts_to_run)
+            review_path = reviewer.review(content, jd_text, docx_path, layouts_to_run)
         except Exception as exc:
             print(f"  [warn] Review generation failed: {exc}")
+
+    # Log to job application tracker (JD-tailored runs only)
+    if jd_source and content and content.get("meta"):
+        meta = content["meta"]
+        try:
+            job_tracker.log_application(
+                company=meta.get("company", ""),
+                role=meta.get("role", ""),
+                jd_source=jd_source,
+                layouts=layouts_to_run,
+                pdf_1col=pdf_paths.get("1col", ""),
+                pdf_2col=pdf_paths.get("2col", ""),
+                docx=docx_path or "",
+                review_path=review_path or "",
+            )
+        except Exception as exc:
+            print(f"  [warn] Job tracker update failed: {exc}")
 
 
 if __name__ == "__main__":
