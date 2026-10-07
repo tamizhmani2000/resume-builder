@@ -1,0 +1,919 @@
+<title>Resume Builder Pipeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+
+<style>
+/* ── Tokens ──────────────────────────────────────────────────────────── */
+:root {
+  --bg:        #F8F9FC;
+  --bg-2:      #FFFFFF;
+  --bg-3:      #F1F3F9;
+  --border:    #E4E7EF;
+  --border-2:  #CDD1DE;
+  --text:      #111827;
+  --muted:     #6B7280;
+  --faint:     #9CA3B0;
+
+  --blue:      #3B72F6;
+  --blue-dim:  #EEF3FF;
+  --blue-mid:  #B6CBFD;
+  --purple:    #7C3AED;
+  --purple-dim:#F3EDFF;
+  --purple-mid:#C4A8F8;
+  --teal:      #0D9488;
+  --teal-dim:  #EDFAF8;
+  --teal-mid:  #6DD5CC;
+  --amber:     #C97B1A;
+  --amber-dim: #FFF7EC;
+  --amber-mid: #F5C37A;
+
+  --mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+  --sans: 'Inter', system-ui, sans-serif;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:        #0D1117;
+    --bg-2:      #161B22;
+    --bg-3:      #1C2230;
+    --border:    #21262D;
+    --border-2:  #30363D;
+    --text:      #E6EDF3;
+    --muted:     #8B949E;
+    --faint:     #6E7681;
+
+    --blue:      #58A6FF;
+    --blue-dim:  #0A1E40;
+    --blue-mid:  #1C4A8A;
+    --purple:    #B794F9;
+    --purple-dim:#180D3A;
+    --purple-mid:#4B2DA0;
+    --teal:      #3DD68C;
+    --teal-dim:  #062118;
+    --teal-mid:  #155A3A;
+    --amber:     #F0A855;
+    --amber-dim: #1E1000;
+    --amber-mid: #7A4A10;
+
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg:        #0D1117;
+  --bg-2:      #161B22;
+  --bg-3:      #1C2230;
+  --border:    #21262D;
+  --border-2:  #30363D;
+  --text:      #E6EDF3;
+  --muted:     #8B949E;
+  --faint:     #6E7681;
+
+  --blue:      #58A6FF;
+  --blue-dim:  #0A1E40;
+  --blue-mid:  #1C4A8A;
+  --purple:    #B794F9;
+  --purple-dim:#180D3A;
+  --purple-mid:#4B2DA0;
+  --teal:      #3DD68C;
+  --teal-dim:  #062118;
+  --teal-mid:  #155A3A;
+  --amber:     #F0A855;
+  --amber-dim: #1E1000;
+  --amber-mid: #7A4A10;
+
+  color-scheme: dark;
+}
+
+/* ── Reset ───────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--sans);
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--text);
+  background: var(--bg);
+  padding-inline: 20px;
+}
+
+/* ── Page shell ──────────────────────────────────────────────────────── */
+.page {
+  max-width: 920px;
+  margin-inline: auto;
+  padding-block: 52px;
+}
+
+/* ── Header ──────────────────────────────────────────────────────────── */
+.page-header {
+  padding-bottom: 36px;
+  margin-bottom: 44px;
+  border-bottom: 1px solid var(--border);
+}
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 10px;
+}
+
+.page-title {
+  font-family: var(--mono);
+  font-size: clamp(22px, 3.5vw, 30px);
+  font-weight: 600;
+  color: var(--text);
+  text-wrap: balance;
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+}
+
+.page-desc {
+  font-size: 14.5px;
+  color: var(--muted);
+  max-width: 580px;
+  line-height: 1.7;
+}
+
+.stat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.stat {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 11px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stat-num {
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* ── Section chrome ──────────────────────────────────────────────────── */
+.section { margin-bottom: 52px; }
+
+.section-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 18px;
+}
+
+/* ── Pipeline flow ───────────────────────────────────────────────────── */
+.pipeline-wrap {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 28px 24px;
+  overflow-x: auto;
+}
+
+.pipeline {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-width: 560px;
+}
+
+.pnode {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  flex-shrink: 0;
+  width: 108px;
+}
+
+.pnode-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  transition: transform 0.15s;
+}
+
+.pnode:hover .pnode-icon { transform: translateY(-2px); }
+
+.pnode-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text);
+  text-align: center;
+  line-height: 1.3;
+}
+
+.pnode-sub {
+  font-size: 10.5px;
+  color: var(--faint);
+  text-align: center;
+  font-family: var(--mono);
+  line-height: 1.2;
+}
+
+.parrow {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 18px;
+  padding-bottom: 28px;
+}
+
+.parrow-line {
+  flex: 1;
+  height: 1.5px;
+  background: var(--border-2);
+  position: relative;
+}
+
+.parrow-line::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  top: -3.5px;
+  width: 0;
+  height: 0;
+  border-top: 4.5px solid transparent;
+  border-bottom: 4.5px solid transparent;
+  border-left: 6px solid var(--border-2);
+}
+
+/* node color variants */
+.n-src  .pnode-icon { background: var(--blue-dim);   color: var(--blue);   }
+.n-load .pnode-icon { background: var(--blue-dim);   color: var(--blue);   }
+.n-ai   .pnode-icon { background: var(--purple-dim); color: var(--purple); }
+.n-gen  .pnode-icon { background: var(--amber-dim);  color: var(--amber);  }
+.n-rev  .pnode-icon { background: var(--teal-dim);   color: var(--teal);   }
+.n-out  .pnode-icon { background: var(--teal-dim);   color: var(--teal);   }
+
+/* ── Parallel agents diagram ─────────────────────────────────────────── */
+.agents-box {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 22px 24px 24px;
+  margin-bottom: 16px;
+}
+
+.agents-caption {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.agents-layout {
+  display: grid;
+  grid-template-columns: 142px 1fr 142px;
+  align-items: center;
+  gap: 12px;
+}
+
+.a-node {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  border-radius: 7px;
+  padding: 14px 12px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.a-node-in  { background: var(--purple-dim); color: var(--purple); border: 1px solid var(--purple-mid); }
+.a-node-out { background: var(--teal-dim);   color: var(--teal);   border: 1px solid var(--teal-mid);   }
+
+.a-agents {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  position: relative;
+  padding: 0 8px;
+}
+
+.a-agent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 5px 10px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--text);
+  transition: border-color 0.15s;
+}
+
+.a-agent:hover { border-color: var(--purple-mid); }
+
+.a-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--purple);
+  flex-shrink: 0;
+}
+
+.a-agent-name { font-weight: 600; color: var(--purple); min-width: 74px; }
+.a-agent-desc { color: var(--muted); font-size: 10.5px; }
+
+/* audit note */
+.audit-note {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--muted);
+  font-family: var(--mono);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.audit-badge {
+  background: var(--amber-dim);
+  color: var(--amber);
+  border: 1px solid var(--amber-mid);
+  border-radius: 4px;
+  padding: 2px 9px;
+  font-size: 10.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ── Stage cards ──────────────────────────────────────────────────────── */
+.stages { display: flex; flex-direction: column; gap: 10px; }
+
+.stage-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.stage-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.stage-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.tag-src  { background: var(--blue-dim);   color: var(--blue);   }
+.tag-load { background: var(--blue-dim);   color: var(--blue);   }
+.tag-ai   { background: var(--purple-dim); color: var(--purple); }
+.tag-gen  { background: var(--amber-dim);  color: var(--amber);  }
+.tag-rev  { background: var(--teal-dim);   color: var(--teal);   }
+
+.stage-head-text {}
+.stage-title {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.stage-path {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--faint);
+}
+
+.stage-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+.stage-desc {
+  padding: 16px 20px;
+  border-right: 1px solid var(--border);
+}
+
+.stage-desc p {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.stage-desc p + p { margin-top: 8px; }
+
+.stage-items { padding: 16px 20px; }
+
+.items-heading {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 8px;
+}
+
+.item-row {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  padding: 3.5px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.item-row:last-child { border-bottom: none; }
+
+.item-mark {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--faint);
+  flex-shrink: 0;
+  min-width: 14px;
+}
+
+/* ── Output naming ────────────────────────────────────────────────────── */
+pre {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 20px;
+  overflow-x: auto;
+  line-height: 1.9;
+  color: var(--muted);
+  tab-size: 2;
+}
+
+.out-base   { color: var(--blue);   }
+.out-jd     { color: var(--purple); }
+.out-review { color: var(--teal);   }
+.out-cl     { color: var(--amber);  }
+.out-comment{ color: var(--faint);  font-style: italic; }
+
+/* ── Module table ──────────────────────────────────────────────────────── */
+.module-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.module-table th {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--faint);
+  padding: 8px 14px;
+  text-align: left;
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.module-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.module-table tr:last-child td { border-bottom: none; }
+
+.module-table tbody tr:hover td { background: var(--bg-3); }
+
+.td-path {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.td-caller {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--faint);
+}
+
+/* ── File tree ────────────────────────────────────────────────────────── */
+.tree {
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.9;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 22px;
+  overflow-x: auto;
+}
+
+.t-dir      { color: var(--text); font-weight: 600; }
+.t-entry    { color: var(--muted); }
+.t-key      { color: var(--blue); }
+.t-ai       { color: var(--purple); }
+.t-out      { color: var(--teal); }
+.t-comment  { color: var(--faint); font-style: italic; }
+
+/* ── Inline code ────────────────────────────────────────────────────────── */
+code {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 5px;
+  color: var(--text);
+}
+
+/* ── Responsive ───────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .stage-body  { grid-template-columns: 1fr; }
+  .stage-desc  { border-right: none; border-bottom: 1px solid var(--border); }
+  .agents-layout { grid-template-columns: 1fr; }
+  .a-node-out  { display: none; }
+}
+</style>
+
+<div class="page">
+
+  <!-- ── Header ── -->
+  <header class="page-header">
+    <div class="eyebrow">resume-builder · src/</div>
+    <h1 class="page-title">Pipeline &amp; Workflow</h1>
+    <p class="page-desc">
+      End-to-end flow from candidate profile and job description to tailored PDFs, DOCX, and ATS review — orchestrated by <code>src/generate.py</code>.
+    </p>
+    <div class="stat-row">
+      <div class="stat"><span class="stat-num">7</span> parallel Claude agents</div>
+      <div class="stat"><span class="stat-num">3</span> output formats</div>
+      <div class="stat"><span class="stat-num">2</span> PDF layouts</div>
+      <div class="stat"><span class="stat-num">1</span> keyword audit pass</div>
+      <div class="stat">entry: <span class="stat-num">src/generate.py</span></div>
+    </div>
+  </header>
+
+  <!-- ── Pipeline overview ── -->
+  <section class="section">
+    <div class="section-label">End-to-End Flow</div>
+    <div class="pipeline-wrap">
+      <div class="pipeline">
+
+        <div class="pnode n-src">
+          <div class="pnode-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <div class="pnode-label">Source</div>
+          <div class="pnode-sub">profile.md<br>+ JD</div>
+        </div>
+
+        <div class="parrow"><div class="parrow-line"></div></div>
+
+        <div class="pnode n-load">
+          <div class="pnode-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="12" y2="16"/><line x1="16" y1="12" x2="12" y2="16"/></svg>
+          </div>
+          <div class="pnode-label">JD Loader</div>
+          <div class="pnode-sub">jd_loader.py</div>
+        </div>
+
+        <div class="parrow"><div class="parrow-line"></div></div>
+
+        <div class="pnode n-ai">
+          <div class="pnode-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <div class="pnode-label">AI Tailor</div>
+          <div class="pnode-sub">7 agents</div>
+        </div>
+
+        <div class="parrow"><div class="parrow-line"></div></div>
+
+        <div class="pnode n-gen">
+          <div class="pnode-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07M8.46 8.46a5 5 0 0 0 0 7.07"/></svg>
+          </div>
+          <div class="pnode-label">Generate</div>
+          <div class="pnode-sub">3 generators</div>
+        </div>
+
+        <div class="parrow"><div class="parrow-line"></div></div>
+
+        <div class="pnode n-rev">
+          <div class="pnode-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </div>
+          <div class="pnode-label">Review &amp;<br>Track</div>
+          <div class="pnode-sub">reviewer.py</div>
+        </div>
+
+        <div class="parrow"><div class="parrow-line"></div></div>
+
+        <div class="pnode n-out">
+          <div class="pnode-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div class="pnode-label">Output</div>
+          <div class="pnode-sub">output/</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Parallel agents ── -->
+  <section class="section">
+    <div class="section-label">Parallel AI Tailoring</div>
+    <div class="agents-box">
+      <p class="agents-caption">
+        When <code>--jd</code> is provided, <code>jd_tailor.py</code> splits <code>profile.md</code> into section slices and dispatches 7 Claude sub-agents simultaneously via <code>ThreadPoolExecutor</code>. Each agent receives only the profile sections relevant to its task and a focused JSON output schema. Results merge into a single content dict, then a keyword audit pass patches the top remaining JD gaps.
+      </p>
+      <div class="agents-layout">
+        <div class="a-node a-node-in">profile.md<br>+ JD text<br>↓<br>Claude API</div>
+        <div class="a-agents">
+          <div class="a-agent"><span class="a-dot"></span><span class="a-agent-name">meta</span><span class="a-agent-desc">company, role, role_slug</span></div>
+          <div class="a-agent"><span class="a-dot"></span><span class="a-agent-name">header</span><span class="a-agent-desc">tagline &amp; competencies, reordered</span></div>
+          <div class="a-agent"><span class="a-dot"></span><span class="a-agent-name">summary</span><span class="a-agent-desc">3-bullet executive summary</span></div>
+          <div class="a-agent"><span class="a-dot"></span><span class="a-agent-name">highlights</span><span class="a-agent-desc">7 career highlights, JD-prioritized</span></div>
+          <div class="a-agent"><span class="a-dot"></span><span class="a-agent-name">experience</span><span class="a-agent-desc">all roles, reordered bullets</span></div>
+          <div class="a-agent"><span class="a-dot"></span><span class="a-agent-name">skills</span><span class="a-agent-desc">technical skills &amp; certifications</span></div>
+          <div class="a-agent"><span class="a-dot"></span><span class="a-agent-name">education</span><span class="a-agent-desc">degrees, verbatim from profile</span></div>
+        </div>
+        <div class="a-node a-node-out">merge<br>↓<br>keyword audit<br>↓<br>content dict</div>
+      </div>
+      <div class="audit-note">
+        <span class="audit-badge">AUDIT PASS</span>
+        After merge, a keyword auditor agent identifies the top 5 JD keyword gaps and patches the content dict — only using facts already present in the resume.
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Stage detail cards ── -->
+  <section class="section">
+    <div class="section-label">Pipeline Stages</div>
+    <div class="stages">
+
+      <!-- Stage: Source Inputs -->
+      <div class="stage-card">
+        <div class="stage-head">
+          <span class="stage-tag tag-src">INPUT</span>
+          <div class="stage-head-text">
+            <div class="stage-title">Source Inputs</div>
+            <div class="stage-path">docs/profile.md · docs/JD/ · --jd &lt;url|path&gt;</div>
+          </div>
+        </div>
+        <div class="stage-body">
+          <div class="stage-desc">
+            <p><code>docs/profile.md</code> is the single source of truth for all resume content. The AI tailoring step is bound by strict instruction to use only facts from this file — nothing is invented or embellished.</p>
+            <p>A job description is optional. Omitting <code>--jd</code> generates the base profile resume. Providing one triggers the full tailoring pipeline.</p>
+          </div>
+          <div class="stage-items">
+            <div class="items-heading">Accepted JD sources</div>
+            <div class="item-row"><span class="item-mark">→</span>LinkedIn job URL</div>
+            <div class="item-row"><span class="item-mark">→</span>Any public job posting URL</div>
+            <div class="item-row"><span class="item-mark">→</span>Local <code>.md</code> file</div>
+            <div class="item-row"><span class="item-mark">→</span>Local <code>.txt</code> file</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stage: JD Loader -->
+      <div class="stage-card">
+        <div class="stage-head">
+          <span class="stage-tag tag-load">LOAD</span>
+          <div class="stage-head-text">
+            <div class="stage-title">JD Loader</div>
+            <div class="stage-path">src/tools/jd_loader.py</div>
+          </div>
+        </div>
+        <div class="stage-body">
+          <div class="stage-desc">
+            <p>Fetches and normalises the job description into clean plain text. For URLs, uses <code>curl</code> with system CA certificates, then BeautifulSoup to strip navigation, footers, and sidebars.</p>
+            <p>LinkedIn jobs get a dedicated extraction path that isolates the <code>description__text</code> container, trimming "Similar jobs" noise and boilerplate above the actual role description.</p>
+          </div>
+          <div class="stage-items">
+            <div class="items-heading">Processing steps</div>
+            <div class="item-row"><span class="item-mark">1</span>Fetch via curl (–30s timeout)</div>
+            <div class="item-row"><span class="item-mark">2</span>Strip script, style, nav, footer</div>
+            <div class="item-row"><span class="item-mark">3</span>LinkedIn: target job-details container</div>
+            <div class="item-row"><span class="item-mark">4</span>Collapse whitespace, return plain text</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stage: AI Tailor -->
+      <div class="stage-card">
+        <div class="stage-head">
+          <span class="stage-tag tag-ai">AI</span>
+          <div class="stage-head-text">
+            <div class="stage-title">AI Tailoring</div>
+            <div class="stage-path">src/tools/jd_tailor.py · src/tools/claude_client.py</div>
+          </div>
+        </div>
+        <div class="stage-body">
+          <div class="stage-desc">
+            <p>Splits <code>profile.md</code> into named section chunks, then dispatches 7 Claude agents in parallel. Each agent receives only the profile sections it needs and returns a section-scoped JSON fragment. A failed agent is retried once before raising.</p>
+            <p>The JD is capped at 6,000 chars for content agents to avoid prompt bloat; the <code>meta</code> agent always receives the full JD so the company name — often at the end — is never truncated.</p>
+          </div>
+          <div class="stage-items">
+            <div class="items-heading">Output dict keys</div>
+            <div class="item-row"><span class="item-mark">·</span>meta (company, role, role_slug)</div>
+            <div class="item-row"><span class="item-mark">·</span>tagline, competencies</div>
+            <div class="item-row"><span class="item-mark">·</span>summary[ ], highlights[ ]</div>
+            <div class="item-row"><span class="item-mark">·</span>experience[ ] with bullets[ ]</div>
+            <div class="item-row"><span class="item-mark">·</span>technical_skills[ ], certifications[ ]</div>
+            <div class="item-row"><span class="item-mark">·</span>education[ ]</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stage: Generation -->
+      <div class="stage-card">
+        <div class="stage-head">
+          <span class="stage-tag tag-gen">GENERATE</span>
+          <div class="stage-head-text">
+            <div class="stage-title">Resume Generation</div>
+            <div class="stage-path">src/generate.py · src/templates/</div>
+          </div>
+        </div>
+        <div class="stage-body">
+          <div class="stage-desc">
+            <p><code>generate.py</code> loads template generator modules dynamically via <code>importlib</code> and calls <code>build(content)</code> on each. When no JD is provided, generators fall back to their embedded base profile data.</p>
+            <p>DOCX is generated only once regardless of <code>--layout</code> flag — both PDF layouts share the same DOCX source. The reviewer starts in a background thread as soon as the DOCX path is known, running concurrently with any remaining PDF work.</p>
+          </div>
+          <div class="stage-items">
+            <div class="items-heading">Generators (ats-friendly)</div>
+            <div class="item-row"><span class="item-mark">→</span>ats_friendly_1col_generator.py → PDF</div>
+            <div class="item-row"><span class="item-mark">→</span>ats_friendly_2col_generator.py → PDF</div>
+            <div class="item-row"><span class="item-mark">→</span>ats_friendly_docx_generator.py → DOCX</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stage: Review + Track -->
+      <div class="stage-card">
+        <div class="stage-head">
+          <span class="stage-tag tag-rev">REVIEW</span>
+          <div class="stage-head-text">
+            <div class="stage-title">ATS Review &amp; Job Tracking</div>
+            <div class="stage-path">src/tools/reviewer.py · src/tools/job_tracker.py</div>
+          </div>
+        </div>
+        <div class="stage-body">
+          <div class="stage-desc">
+            <p>The reviewer runs in a background thread (saves 60–120s vs. sequential). It passes the content dict and JD to Claude, which produces a structured Markdown report scored on ATS compliance and JD fit.</p>
+            <p>After the review completes, <code>job_tracker.py</code> appends one row to <code>docs/job_applications.csv</code>, extracting ATS and JD-fit scores from the review file via regex.</p>
+          </div>
+          <div class="stage-items">
+            <div class="items-heading">Review report sections</div>
+            <div class="item-row"><span class="item-mark">·</span>ATS compliance score / 100</div>
+            <div class="item-row"><span class="item-mark">·</span>JD fit score / 100 + strengths &amp; gaps</div>
+            <div class="item-row"><span class="item-mark">·</span>Top 3 actionable improvements</div>
+            <div class="item-row"><span class="item-mark">·</span>Submission channel guide</div>
+            <div class="item-row"><span class="item-mark">·</span>20–25 keyword coverage table</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Output naming ── -->
+  <section class="section">
+    <div class="section-label">Output File Naming</div>
+    <pre>output/
+  <span class="out-comment"># Base profile (no JD)</span>
+  <span class="out-base">TJ_Tamilmani_Jayaraman_Resume.pdf</span>          <span class="out-comment">2col PDF</span>
+  <span class="out-base">TJ_Tamilmani_Jayaraman_Resume_1col.pdf</span>     <span class="out-comment">1col PDF</span>
+  <span class="out-base">TJ_Tamilmani_Jayaraman_Resume.docx</span>         <span class="out-comment">DOCX</span>
+  <span class="out-base">TJ__Resume_review.md</span>                       <span class="out-comment">base review</span>
+
+  <span class="out-comment"># JD-tailored run</span>
+  <span class="out-jd">TJ_Tamilmani_Jayaraman_Resume_&lt;Company&gt;_&lt;role_slug&gt;.pdf</span>
+  <span class="out-jd">TJ_Tamilmani_Jayaraman_Resume_&lt;Company&gt;_&lt;role_slug&gt;_1col.pdf</span>
+  <span class="out-jd">TJ_Tamilmani_Jayaraman_Resume_&lt;Company&gt;_&lt;role_slug&gt;.docx</span>
+  <span class="out-review">TJ_Tamilmani_Jayaraman_Resume_&lt;Company&gt;_&lt;role_slug&gt;_review.md</span>
+
+  <span class="out-comment"># Cover letter (standalone tool)</span>
+  <span class="out-cl">TJ_Tamilmani_Jayaraman_CoverLetter_&lt;Company&gt;_&lt;role_slug&gt;.docx</span></pre>
+  </section>
+
+  <!-- ── Module reference ── -->
+  <section class="section">
+    <div class="section-label">Module Reference</div>
+    <table class="module-table">
+      <thead>
+        <tr>
+          <th>Module</th>
+          <th>Role</th>
+          <th>Called by</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="td-path">src/generate.py</td>
+          <td>Entry point — orchestrates JD load, tailor, generation, review, and tracking</td>
+          <td class="td-caller">CLI · slash command</td>
+        </tr>
+        <tr>
+          <td class="td-path">src/tools/jd_loader.py</td>
+          <td>Fetches and cleans JD text from a URL or local file</td>
+          <td class="td-caller">generate.py · jd_tailor.py</td>
+        </tr>
+        <tr>
+          <td class="td-path">src/tools/jd_tailor.py</td>
+          <td>Dispatches 7 parallel Claude agents; returns merged content dict</td>
+          <td class="td-caller">generate.py</td>
+        </tr>
+        <tr>
+          <td class="td-path">src/tools/claude_client.py</td>
+          <td>Shared single-turn Claude CLI caller (<code>claude -p</code>)</td>
+          <td class="td-caller">jd_tailor.py · reviewer.py · cover_letter_generator.py</td>
+        </tr>
+        <tr>
+          <td class="td-path">src/tools/reviewer.py</td>
+          <td>Generates ATS + JD-fit review Markdown; runs in background thread</td>
+          <td class="td-caller">generate.py</td>
+        </tr>
+        <tr>
+          <td class="td-path">src/tools/job_tracker.py</td>
+          <td>Appends one application row to <code>docs/job_applications.csv</code></td>
+          <td class="td-caller">generate.py</td>
+        </tr>
+        <tr>
+          <td class="td-path">src/tools/cover_letter_generator.py</td>
+          <td>Generates a tailored cover letter DOCX via Claude</td>
+          <td class="td-caller">CLI (standalone)</td>
+        </tr>
+        <tr>
+          <td class="td-path">src/templates/ats_friendly_*</td>
+          <td>PDF and DOCX generators; each exposes <code>build(content=None)</code></td>
+          <td class="td-caller">generate.py via importlib</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ── File tree ── -->
+  <section class="section">
+    <div class="section-label">Repository Structure</div>
+    <div class="tree">
+      <span class="t-dir">resume-builder/</span><br>
+      ├── <span class="t-dir">src/</span><br>
+      │   ├── <span class="t-key">generate.py</span>                     <span class="t-comment">← entry point</span><br>
+      │   ├── <span class="t-dir">templates/</span><br>
+      │   │   ├── <span class="t-entry">ats-friendly.pdf</span>            <span class="t-comment">← template reference</span><br>
+      │   │   ├── <span class="t-entry">ats_friendly_1col_generator.py</span><br>
+      │   │   ├── <span class="t-entry">ats_friendly_2col_generator.py</span><br>
+      │   │   └── <span class="t-entry">ats_friendly_docx_generator.py</span><br>
+      │   └── <span class="t-dir">tools/</span><br>
+      │       ├── <span class="t-ai">jd_tailor.py</span>                   <span class="t-comment">← 7 parallel Claude agents</span><br>
+      │       ├── <span class="t-entry">jd_loader.py</span><br>
+      │       ├── <span class="t-entry">claude_client.py</span><br>
+      │       ├── <span class="t-entry">reviewer.py</span><br>
+      │       ├── <span class="t-entry">job_tracker.py</span><br>
+      │       └── <span class="t-entry">cover_letter_generator.py</span><br>
+      ├── <span class="t-dir">docs/</span><br>
+      │   ├── <span class="t-key">profile.md</span>                       <span class="t-comment">← source of truth (do not modify)</span><br>
+      │   ├── <span class="t-entry">job_applications.csv</span><br>
+      │   ├── <span class="t-dir">workflow/</span>                        <span class="t-comment">← this document</span><br>
+      │   └── <span class="t-dir">JD/</span>                              <span class="t-comment">← local job description files</span><br>
+      └── <span class="t-out">output/</span>                              <span class="t-comment">← all generated artifacts</span><br>
+    </div>
+  </section>
+
+</div>

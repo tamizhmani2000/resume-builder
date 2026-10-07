@@ -16,7 +16,7 @@ import re
 from datetime import date
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
-TRACKER_PATH = os.path.join(_HERE, "..", "docs", "job_applications.csv")
+TRACKER_PATH = os.path.join(_HERE, "..", "..", "docs", "job_applications.csv")
 
 COLUMNS = [
     "date_applied",

@@ -28,7 +28,7 @@ def _output_path(content=None):
         fname   = f"TJ_Tamilmani_Jayaraman_Resume{suffix}.docx"
     else:
         fname = "TJ_Tamilmani_Jayaraman_Resume.docx"
-    return os.path.join(_HERE, "..", "output", fname)
+    return os.path.join(_HERE, "..", "..", "output", fname)
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────

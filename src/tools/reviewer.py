@@ -8,11 +8,11 @@ Output: <docx_stem>_review.md in the same output/ directory.
 
 import json
 import os
-import subprocess
+import sys
 from datetime import date
 
-_HERE = os.path.dirname(os.path.abspath(__file__))
-_PROFILE_PATH = os.path.join(_HERE, "..", "docs", "profile.md")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import claude_client
 
 _SYSTEM_PROMPT = """\
 You are an expert ATS compliance reviewer and technical recruiting specialist with deep \
@@ -35,9 +35,6 @@ Review the resume content below and write a complete ATS compliance and JD fit r
 
 ## Job Description
 {jd_section}
-
-## Original Candidate Profile (for fact-checking completeness)
-{profile_text}
 
 ---
 
@@ -126,11 +123,14 @@ def review(
         meta = content["meta"]
         role_line = f"- Target Role: {meta.get('role', '')} — {meta.get('company', '')}"
 
-    content_json = json.dumps(content, indent=2) if content else "(base profile — no JD tailoring applied)"
-    jd_section = jd_text.strip() if jd_text else "(No JD provided — ATS compliance review only)"
-
-    with open(_PROFILE_PATH, "r", encoding="utf-8") as f:
-        profile_text = f.read()
+    # Compact JSON (no indentation) keeps the same data at ~40% fewer characters
+    content_json = json.dumps(content, separators=(",", ":")) if content else "(base profile — no JD tailoring applied)"
+    # Cap JD at 4000 chars — the reviewer only needs the requirements, not full boilerplate
+    if jd_text:
+        jd_raw = jd_text.strip()
+        jd_section = jd_raw[:4000] + ("\n...[truncated]" if len(jd_raw) > 4000 else "")
+    else:
+        jd_section = "(No JD provided — ATS compliance review only)"
 
     prompt = _PROMPT_TEMPLATE.format(
         docx_filename=docx_filename,
@@ -139,24 +139,10 @@ def review(
         role_line=role_line,
         content_json=content_json,
         jd_section=jd_section,
-        profile_text=profile_text,
     )
 
     print(f"  Generating review...")
-    result = subprocess.run(
-        [
-            "claude", "-p", prompt,
-            "--system-prompt", _SYSTEM_PROMPT,
-            "--output-format", "text",
-        ],
-        capture_output=True,
-        text=True,
-        timeout=300,
-    )
-    if result.returncode != 0:
-        raise RuntimeError(result.stderr.strip() or f"claude CLI exited {result.returncode}")
-
-    md_text = result.stdout.strip()
+    md_text = claude_client.call(_SYSTEM_PROMPT, prompt).strip()
 
     with open(review_path, "w", encoding="utf-8") as f:
         f.write(md_text)

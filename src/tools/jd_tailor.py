@@ -13,9 +13,10 @@ The model is instructed to only use facts from the profile — no invented conte
 import json
 import os
 import re
-import subprocess
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
+import claude_client
 
 SYSTEM_PROMPT = """\
 You are an expert resume writer. Your task is to tailor a technology executive's \
@@ -35,6 +36,10 @@ STRICT RULES:
 7. NEVER mention the hiring company or organization from the JD anywhere in the \
    resume content (summary, highlights, experience, skills, or any other section). \
    The resume must be company-agnostic — it describes the candidate's background only.
+8. Gap-analysis pass: before finalising your output, identify the 5–10 most critical \
+   JD keywords for this section. For any that are absent from your draft, check whether \
+   the profile contains analogous work that can be accurately reframed in the JD's \
+   vocabulary. Surface those analogues — ONLY where factually accurate.
 """
 
 # ---------------------------------------------------------------------------
@@ -66,6 +71,16 @@ If the JD is in financial services, fintech, or auto finance:
 - Use domain vocabulary that mirrors the JD: "customer account servicing," \
   "financial operations platforms," "regulated financial services," or equivalent — \
   only where the profile supports it.
+If the JD is for a D2C, consumer health, telehealth, subscription commerce, or \
+subscription-first company (signals: "subscription", "recurring", "subscriber", \
+"telehealth", "clinical", "health platform", "D2C"):
+- Surface any health-adjacent domain work from the profile (pharmacy eCommerce, \
+  health data environments, regulated consumer data) to establish domain credibility.
+- Reframe any recurring billing, auto-pay, or B2B payment scheduling work using \
+  subscription vocabulary (e.g. "recurring billing", "subscription commerce") — \
+  only where the underlying work justifies it.
+- Use "conversion and retention" as paired commerce success metrics where the \
+  profile supports both.
 Return JSON:
 {{"summary": ["<bullet 1>", "<bullet 2>", "<bullet 3>"]}}
 """,
@@ -98,6 +113,53 @@ If the JD is an AI/ML platform or data engineering role:
 - When the profile references Databricks, Kafka, or similar pipeline tools in the context \
   of ML or data workflows, surface them as workflow orchestration / pipeline orchestration \
   to address JD requirements for Airflow-style tooling.
+If the JD is for a D2C, consumer health, telehealth, or subscription commerce company \
+(signals: "subscription", "recurring", "D2C", "telehealth", "clinical", "health platform", \
+"promotions", "catalog", "checkout"):
+- For roles touching pharmacy, health, or regulated consumer data (e.g. Walgreens at \
+  Cognizant), add or reframe a bullet naming the health/pharmacy domain and referencing \
+  health data sensitivity or regulatory context (e.g. "pharmacy-regulated eCommerce", \
+  "health data privacy controls").
+- Reframe any recurring billing, auto-pay, B2B payment scheduling, or membership work \
+  using subscription language: "recurring billing", "subscription billing", "recurring \
+  payment infrastructure" — only where the underlying work justifies it.
+- For B2C/eCommerce roles (e.g. Neiman Marcus), foreground consumer-facing outcomes: \
+  conversion rate improvements, customer journey architecture, consumer UX decisions, \
+  and retention-related metrics. Lead with these over infrastructure bullets.
+- Surface any promotions engine, discounting logic, coupon/offer systems, A/B test \
+  framework, or feature toggle work explicitly under "promotions platform" or \
+  "promotions domain" framing.
+- Where the JD pairs "conversion and retention" as success metrics, ensure both appear \
+  in relevant experience bullets where the profile has supporting evidence.
+If the JD is a healthcare, pharmacy, pharmacy benefit management (PBM), or health-tech role \
+(signals: "pharmacy", "PBM", "pharmacy benefit management", "formulary", "claims", \
+"healthcare", "benefits", "clinical", "health plan", "member", "payer", "provider"):
+- At Cognizant (Associate Director): lead with the Walgreens engagement — frame it explicitly \
+  as pharmacy benefit management platform modernization: re-engineered and cloud-native-architected \
+  the pharmacy benefits and eCommerce platform for Walgreens, a leading pharmacy benefit operator. \
+  Reference health data sensitivity, regulatory context (HIPAA-adjacent), and the scale of the \
+  pharmacy customer base. Make this the first or second bullet in that role.
+- Reframe "modernized the ecommerce platforms" for Walgreens as modernizing the \
+  pharmacy benefit management and member-facing digital platform — cloud-native microservices, \
+  API-first architecture, scalable benefits delivery — only where the profile's underlying \
+  work justifies the framing.
+- In the summary, surface the Walgreens/pharmacy domain work as a specific healthcare \
+  industry credential alongside financial services credibility.
+If the JD is a frontend engineering, UI platform, or developer experience role \
+(signals: "frontend", "component library", "monorepo", "Angular", "TypeScript", \
+"design system", "accessibility", "WCAG", "developer tooling", "UI platform", \
+"micro-frontend"):
+- At Neiman-Marcus Group: lead with all frontend/UI bullets — micro-frontend architecture, \
+  React/TypeScript/NodeJS component development, design systems, A/B testing and feature \
+  toggle frameworks, search platform modernization. Name specific UI libraries and frameworks.
+- At Southern Glazers Wine & Spirits: foreground design systems, micro-frontend \
+  architectures, Internal Developer Platform (IDP), A/B test and toggle frameworks, \
+  AI-assisted developer tooling (GitHub Copilot, Claude Code). Frame the IDP as a \
+  shared developer platform and component delivery system.
+- In technical skills, ensure Angular, TypeScript, ReactJS, NodeJS, micro-frontends, \
+  design systems, and CI/CD for frontend assets are prominent and listed first.
+- Do NOT invent monorepo experience if the profile does not explicitly mention it; \
+  surface the closest analogues (IDP, shared component platforms, design systems) instead.
 Return JSON:
 {{"experience": [
   {{"title": "<exact title>", "company": "<exact company>", "dates": "<exact dates>",
@@ -141,6 +203,19 @@ Return JSON:
 """,
 }
 
+# Maps each resume section to the profile ## headings it needs.
+# Keys are normalised header slugs produced by _extract_profile_sections().
+SECTION_PROFILE_SLICE: dict[str, list[str]] = {
+    "meta":       [],                                               # JD only — no profile needed
+    "education":  ["education", "contact"],
+    "header":     ["expertise", "skills_competencies", "certifications"],
+    "highlights": ["executive_summary", "professional_achievements"],
+    "skills":     ["skills_competencies", "certifications"],
+    "summary":    ["expertise", "executive_summary",
+                   "professional_achievements", "professional_experience"],
+    "experience": ["professional_experience"],
+}
+
 SECTION_CONTEXT = """\
 ## Candidate Profile
 {profile}
@@ -151,6 +226,117 @@ SECTION_CONTEXT = """\
 ## Your Task
 {task}
 """
+
+# ---------------------------------------------------------------------------
+# Option 2 — post-tailoring keyword audit pass
+# Runs after all section agents complete; patches the top remaining gaps.
+# ---------------------------------------------------------------------------
+
+KEYWORD_AUDIT_SYSTEM = """\
+You are a resume keyword auditor. You review a tailored resume against a job description \
+and produce targeted, factually-grounded corrections for the most critical keyword gaps.
+
+STRICT RULES:
+1. Only use facts from the candidate profile. Do NOT invent or embellish content.
+2. Return corrections for the top 5 gaps maximum — focus on highest-severity gaps only.
+3. Every correction must use the JD's exact vocabulary where possible.
+4. Return ONLY valid JSON — no markdown fences, no commentary.
+5. NEVER mention the hiring company in any correction text.
+"""
+
+KEYWORD_AUDIT_PROMPT = """\
+## Job Description
+{jd}
+
+## Current Tailored Resume Content (JSON)
+{content}
+
+## Your Task
+Identify the top 5 highest-severity JD keyword gaps in the resume content above. \
+The resume content already contains all available candidate facts — use only what is \
+present in it. Do NOT invent content.
+
+Return JSON:
+{{
+  "corrections": [
+    {{
+      "section": "<summary|highlights|experience|skills>",
+      "company": "<exact company name if section=experience, else null>",
+      "action": "<add|replace>",
+      "old": "<exact existing text to replace — null if action=add>",
+      "new": "<corrected or new text using JD vocabulary, grounded in resume facts>"
+    }}
+  ]
+}}
+"""
+
+
+def _apply_corrections(content: dict, corrections: list) -> dict:
+    import copy
+    c = copy.deepcopy(content)
+    for corr in corrections:
+        section = corr.get("section")
+        action  = corr.get("action")
+        company = (corr.get("company") or "").lower()
+        old     = corr.get("old")
+        new     = corr.get("new")
+        if not new:
+            continue
+
+        if section == "summary":
+            if action == "add":
+                c.setdefault("summary", []).append(new)
+            elif action == "replace" and old:
+                c["summary"] = [new if b == old else b for b in c.get("summary", [])]
+
+        elif section == "highlights":
+            if action == "add":
+                title = new.split(":")[0].strip() if ":" in new else new[:40]
+                c.setdefault("highlights", []).append({"title": title, "desc": new})
+            elif action == "replace" and old:
+                for h in c.get("highlights", []):
+                    if h.get("desc") == old or old in h.get("title", ""):
+                        h["desc"] = new
+                        break
+
+        elif section == "experience":
+            for exp in c.get("experience", []):
+                if company and company not in exp.get("company", "").lower():
+                    continue
+                if action == "add":
+                    exp.setdefault("bullets", []).insert(0, new)
+                elif action == "replace" and old:
+                    exp["bullets"] = [new if b == old else b for b in exp.get("bullets", [])]
+                break
+
+        elif section == "skills":
+            if action == "add":
+                c.setdefault("technical_skills", []).append(new)
+            elif action == "replace" and old:
+                c["technical_skills"] = [
+                    new if s == old else s for s in c.get("technical_skills", [])
+                ]
+    return c
+
+
+def _keyword_audit(profile: str, jd: str, content: dict) -> dict:
+    """Post-tailoring keyword gap analysis and targeted correction pass."""
+    prompt = KEYWORD_AUDIT_PROMPT.format(
+        jd=jd,
+        content=json.dumps(content, indent=2),
+    )
+    try:
+        raw         = claude_client.call(KEYWORD_AUDIT_SYSTEM, prompt)
+        audit_data  = _parse_json(raw)
+        corrections = audit_data.get("corrections", [])
+        if corrections:
+            print(f"  [audit] applying {len(corrections)} keyword correction(s)")
+            content = _apply_corrections(content, corrections)
+        else:
+            print("  [audit] no keyword gaps found")
+    except Exception as exc:
+        print(f"  [warn] keyword audit failed: {exc}", file=sys.stderr)
+    return content
 
 
 def _parse_json(raw: str) -> dict:
@@ -168,38 +354,51 @@ def _parse_json(raw: str) -> dict:
         raise
 
 
-def _call_section(section: str, profile: str, jd: str) -> tuple[str, dict]:
+def _extract_profile_sections(profile: str) -> dict[str, str]:
+    """Split profile.md into named chunks keyed by normalised ## heading slug."""
+    chunks: dict[str, str] = {}
+    current_key = "_preamble"
+    buf = ""
+    for line in profile.splitlines(keepends=True):
+        if line.startswith("## "):
+            if buf.strip():
+                chunks[current_key] = buf
+            heading = line[3:].strip()
+            current_key = re.sub(r"[^a-z0-9]+", "_", heading.lower()).strip("_")
+            buf = line
+        else:
+            buf += line
+    if buf.strip():
+        chunks[current_key] = buf
+    return chunks
+
+
+def _call_section(section: str, profile_sections: dict[str, str], jd: str) -> tuple[str, dict]:
+    keys = SECTION_PROFILE_SLICE.get(section, [])
+    profile_slice = "\n".join(
+        profile_sections[k] for k in keys if k in profile_sections
+    ).strip() or "(not required for this section)"
     prompt = SECTION_CONTEXT.format(
-        profile=profile,
+        profile=profile_slice,
         jd=jd,
         task=SECTION_PROMPTS[section],
     )
-
-    result = subprocess.run(
-        [
-            "claude", "-p", prompt,
-            "--system-prompt", SYSTEM_PROMPT,
-            "--output-format", "text",
-        ],
-        capture_output=True,
-        text=True,
-        timeout=300,
-    )
-    if result.returncode != 0:
-        raise RuntimeError(result.stderr.strip() or f"claude CLI exited {result.returncode}")
-
-    raw = result.stdout
+    raw = claude_client.call(SYSTEM_PROMPT, prompt)
     return section, _parse_json(raw)
 
 
 def _call_parallel(profile: str, jd: str) -> dict:
-
+    profile_sections = _extract_profile_sections(profile)
+    # Truncated JD for content sections — strips EEO/legal boilerplate
+    jd_short = (jd[:6000] + "\n...[truncated]") if len(jd) > 6000 else jd
     results: dict = {}
     sections = list(SECTION_PROMPTS.keys())
 
     with ThreadPoolExecutor(max_workers=len(sections)) as pool:
         futures = {
-            pool.submit(_call_section, section, profile, jd): section
+            # meta gets full JD so the company name (often at the end) is never cut off
+            pool.submit(_call_section, section, profile_sections,
+                        jd if section == "meta" else jd_short): section
             for section in sections
         }
         for future in as_completed(futures):
@@ -211,7 +410,7 @@ def _call_parallel(profile: str, jd: str) -> dict:
             except Exception as exc:
                 print(f"  [warn] {section} failed ({exc}), retrying...", file=sys.stderr)
                 try:
-                    _, data = _call_section(section, profile, jd)
+                    _, data = _call_section(section, profile_sections, jd)
                     results[section] = data
                     print(f"  [done] {section} (retry)")
                 except Exception as exc2:
@@ -222,6 +421,10 @@ def _call_parallel(profile: str, jd: str) -> dict:
     content = {}
     for section_data in results.values():
         content.update(section_data)
+
+    # Post-tailoring keyword audit pass
+    print("  Running keyword audit pass...")
+    content = _keyword_audit(profile, jd, content)
 
     return content
 
@@ -242,7 +445,7 @@ if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python jd_tailor.py <url|path/to/jd.md>")
         sys.exit(1)
-    profile_path = os.path.join(os.path.dirname(__file__), "..", "docs", "profile.md")
+    profile_path = os.path.join(os.path.dirname(__file__), "..", "..", "docs", "profile.md")
     jd_text = jd_loader.load(sys.argv[1])
     result = tailor(profile_path, jd_text)
     print(json.dumps(result, indent=2))

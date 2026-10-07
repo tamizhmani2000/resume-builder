@@ -33,7 +33,7 @@ def _output_path(content=None):
         fname   = f"TJ_Tamilmani_Jayaraman_Resume{suffix}.pdf"
     else:
         fname = "TJ_Tamilmani_Jayaraman_Resume.pdf"
-    return _os.path.join(_HERE, "..", "output", fname)
+    return _os.path.join(_HERE, "..", "..", "output", fname)
 
 
 # ── Page geometry ─────────────────────────────────────────────────────────────

@@ -27,7 +27,7 @@ def _output_path(content=None):
         fname   = f"TJ_Tamilmani_Jayaraman_Resume{suffix}_1col.pdf"
     else:
         fname = "TJ_Tamilmani_Jayaraman_Resume_1col.pdf"
-    return os.path.join(_HERE, "..", "output", fname)
+    return os.path.join(_HERE, "..", "..", "output", fname)
 
 # ── Colors ────────────────────────────────────────────────────────────────────
 GOLD = colors.HexColor("#C49A3C")
