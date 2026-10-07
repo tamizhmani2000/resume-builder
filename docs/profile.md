@@ -59,7 +59,7 @@ billion-dollar platforms.
         - Directed multi-disciplinary engineering and architecture organizations, fostering a culture of excellence to deliver mission-critical, high-availability systems.
         - Spearheaded transformation with $3M annual talent and staffing  portfolio, strategically balancing internal expertise with high-impact vendor partnerships to accelerate delivery.
         - Championed talent acquisition and development, partnering with HR to design robust career frameworks and scale high-performing global teams.
-        - Lead, coach and scale a global engineering organization including multiple engineering manager and senior ICs across the globe.
+        - Lead, coach and scale a global engineering organization of 30–50 engineers including multiple engineering managers and senior ICs across the globe.
     **Modernization & AI:**
         - Spearheaded cloud-native transformation initiatives, optimizing architecture, security protocols, and system performance to meet evolving market demands.
         - Enhanced developer experience through automation, self-service capabilities by rolling out full-fledged IDP (Integrated Developer Platform)
@@ -71,11 +71,13 @@ billion-dollar platforms.
         - Orchestrated the development and production deployment of advanced ML recommendation engines, building robust data pipelines that scaled predictive product matching based on historic buying patterns.
         - Orchestrated the organizational pivot from a reactive AMS model to a proactive SRE framework, driving a 35% reduction in Mean Time to Recovery (MTTR) and achieving 99.99% availability for the $4B e-commerce platform; tracked and improved DORA metrics (deployment frequency, change failure rate, lead time for changes, and MTTR) across the engineering organization.
         - Designed and built payment soutions (auto pay) for B2B customers integrating with various payment providers, rolled out scalable distributed order management platform B2B commerce using SAP Commerce cloud v2 (Hybris)
-        - Full stack engineering leader delivered robust user experience at scale by building design systems, micro-frontend architectures, A/B test and toggle frameworks
+        - Full stack engineering leader delivered robust user experience at scale by building design systems, micro-frontend architectures, A/B test, Accessibility compliances - ADA and WCAG standards and toggle frameworks
+        - Engineered full scale CI/CD pipelines - monorepo, multi-repo, branching strategy with end to end code traceability, automating and shift left the engineering process such as pr-review, security scans, pen testing, component test and deployment.
     **Executive Partnership:**
         - Served as a strategic advisor to C-suite and cross-functional leaders, aligning technology roadmaps, with enterprise investment planning and OKR alignments.
         - Championed FinOps maturity, establishing transparent cloud consumption governance that empowered financial leaders with accurate forecasting and budget control.
         - Fortified enterprise resilience by partnering with security leadership to implement rigorous governance and IAM policies across the global data and application landscape.
+        - Managed hybrid infrastructure operations spanning on-premises data center systems (Windows/Linux servers, enterprise storage, backup/recovery, Active Directory, firewalls, Nutanix/VMware virtualization) alongside the cloud transformation program, maintaining 24x7 operational continuity throughout the migration journey.
         - Provided critical technical due diligence and strategic guidance for M&A activities, ensuring seamless technology integration and value realization for Southern Glazers.
 
 - Organization: Neiman-Marcus Group
@@ -95,6 +97,7 @@ billion-dollar platforms.
         - Lift in driving customer traffic by 5% to web site by improving SEO and modernizing search experience
         - Designed and built integration framework with various third parties including payment providers such as world pay, Paypal and OMS with PCI compliant
         - Led scalable front end architecture / micro front-ends using React, React JS, React Native, NodeJS.
+        - Led full scale implementation on ADA, WCAG compliance for the consumer facing ecommerce web sites and automated through pipelines.
         - Delivered robust A/B testing framework to evaluate feature for ecommerce features, toggle framework, analytics implemnetation using Adobe, Optimizely etc.,
         - Architected and Led the migration of search platform from Endeca to modernized platform such as Bloom reach using composable architecture
         - Integrated third party recommendation engines into commerce platform to boost conversion
@@ -167,7 +170,7 @@ billion-dollar platforms.
     - Change & Release Management (Iterative, Feedback loops, A/B test rollouts, Blue/Green/Canary deploy )
 
 - Technology & Tools
-    - **Cloud:** AWS (EC2, EKS, Fargate, S3, Lambda, API Gateway, DynamoDB, ALB Route53, SQS, Kinesis, Cloud Formation, Bedrock) Azure (AKS, Cosmos DB, Service Bus, Event Grid, Functions), GCP (Compute Engine, GKE, Cloud Run, Cloud SQL, Cloud Storage, Pub/Sub, Big Query, Vertex AI)
+    - **Cloud:** AWS (EC2, EKS, Fargate, S3, Lambda, API Gateway, DynamoDB, ALB, Route53, SQS, Kinesis, CloudFormation, Bedrock, Systems Manager, Security Hub, GuardDuty, AWS Backup, CloudWatch) Azure (AKS, Cosmos DB, Service Bus, Event Grid, Functions), GCP (Compute Engine, GKE, Cloud Run, Cloud SQL, Cloud Storage, Pub/Sub, Big Query, Vertex AI)
     - **Architecture:** Cloud-Native, Microservices, SOA, Composable Commerce, Headless Architecture, API-first
     - **Delivery:** Agile, Scrum, Kanban
     - **Languages:** Java, JavaScript, TypeScript, Python

@@ -10,35 +10,41 @@ This repository is a resume/professional profile builder. The source of truth fo
 
 - `docs/profile.md` — Professional profile and resume source content (Markdown)
 - `docs/JD/sample_jd.md` — Example job description file for testing JD tailoring
+- `docs/workflow/` — Pipeline and workflow documentation (HTML)
 - `output/` — Target directory for generated resume files
-- `templates/` — Contains template reference PDFs and their paired generators
-  - `ats-friendly.pdf` — Template reference for the ATS-friendly two-column layout
-  - `ats_friendly_1col_generator.py` — Single-column ATS-safe PDF generator
-  - `ats_friendly_2col_generator.py` — Two-column visual PDF generator
-  - `ats_friendly_docx_generator.py` — DOCX generator
-- `generate.py` — Entry point for all resume generation
-- `tools/` — Helper modules for JD processing and AI tailoring
-  - `jd_loader.py` — Loads a job description from a URL or local `.md`/`.txt` file
-  - `jd_tailor.py` — Tailors resume content to a JD via Claude API (parallel sub-agents)
+- `src/` — All source code lives here
+  - `generate.py` — Entry point for all resume generation
+  - `templates/` — Template reference PDFs and their paired generators
+    - `ats-friendly.pdf` — Template reference for the ATS-friendly two-column layout
+    - `ats_friendly_1col_generator.py` — Single-column ATS-safe PDF generator
+    - `ats_friendly_2col_generator.py` — Two-column visual PDF generator
+    - `ats_friendly_docx_generator.py` — DOCX generator
+  - `tools/` — Helper modules for JD processing and AI tailoring
+    - `claude_client.py` — Shared Claude CLI caller
+    - `jd_loader.py` — Loads a job description from a URL or local `.md`/`.txt` file
+    - `jd_tailor.py` — Tailors resume content to a JD via Claude API (parallel sub-agents)
+    - `reviewer.py` — ATS compliance and JD-fit review generator
+    - `job_tracker.py` — Appends application rows to `docs/job_applications.csv`
+    - `cover_letter_generator.py` — Generates tailored cover letters
 
 ## How to Generate a Resume
 
 Run from the project root using the Anaconda Python interpreter:
 
 ```bash
-/opt/anaconda3/bin/python3 generate.py                              # base profile, both layouts
-/opt/anaconda3/bin/python3 generate.py --layout 1col               # single-column ATS-safe PDF + DOCX
-/opt/anaconda3/bin/python3 generate.py --layout 2col               # two-column visual PDF + DOCX
+/opt/anaconda3/bin/python3 src/generate.py                              # base profile, both layouts
+/opt/anaconda3/bin/python3 src/generate.py --layout 1col               # single-column ATS-safe PDF + DOCX
+/opt/anaconda3/bin/python3 src/generate.py --layout 2col               # two-column visual PDF + DOCX
 ```
 
 ### JD-Tailored Generation
 
-Provide a job description via `--jd` to generate a resume tailored to a specific role. Content is rewritten by Claude  using parallel sub-agents — one per resume section — to mirror the JD's language and priorities, using only facts from `docs/profile.md`.
+Provide a job description via `--jd` to generate a resume tailored to a specific role. Content is rewritten by Claude using parallel sub-agents — one per resume section — to mirror the JD's language and priorities, using only facts from `docs/profile.md`.
 
 ```bash
-/opt/anaconda3/bin/python3 generate.py --jd https://linkedin.com/jobs/view/...
-/opt/anaconda3/bin/python3 generate.py --jd docs/JD/my_jd.md
-/opt/anaconda3/bin/python3 generate.py --jd docs/JD/my_jd.md --layout 1col
+/opt/anaconda3/bin/python3 src/generate.py --jd https://linkedin.com/jobs/view/...
+/opt/anaconda3/bin/python3 src/generate.py --jd docs/JD/my_jd.md
+/opt/anaconda3/bin/python3 src/generate.py --jd docs/JD/my_jd.md --layout 1col
 ```
 
 Tailored output files are named with the company and role slug:
@@ -76,14 +82,20 @@ output/TJ_Tamilmani_Jayaraman_Resume_<Company>_<role_slug>.docx
 
 **Strict rule enforced in the prompt:** Claude may only use facts from `docs/profile.md` — no invented content.
 
+### Cover Letter Generation
+
+```bash
+/opt/anaconda3/bin/python3 src/tools/cover_letter_generator.py --jd docs/JD/my_jd.md
+```
+
 ## Adding a New Template
 
-1. Add the template reference PDF to `templates/`
+1. Add the template reference PDF to `src/templates/`
 2. Create paired generators:
-   - `templates/<name>_1col_generator.py` — single-column PDF; must expose `build(content=None)`
-   - `templates/<name>_2col_generator.py` — two-column PDF; must expose `build(content=None)`
-   - `templates/<name>_docx_generator.py` — DOCX; must expose `build(content=None)`
-3. Register all three under the new template key in `TEMPLATES` dict in `generate.py`
+   - `src/templates/<name>_1col_generator.py` — single-column PDF; must expose `build(content=None)`
+   - `src/templates/<name>_2col_generator.py` — two-column PDF; must expose `build(content=None)`
+   - `src/templates/<name>_docx_generator.py` — DOCX; must expose `build(content=None)`
+3. Register all three under the new template key in `TEMPLATES` dict in `src/generate.py`
 
 ## Profile Content
 
