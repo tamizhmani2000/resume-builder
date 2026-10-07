@@ -24,11 +24,13 @@ import argparse
 import importlib.util
 import os
 import sys
+from concurrent.futures import ThreadPoolExecutor
 
-# Add tools/ to path so jd_loader and jd_tailor are importable
+# Add src/tools/ to path so jd_loader and jd_tailor are importable
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "tools"))
 
-PROFILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "docs", "profile.md")
+_SRC = os.path.dirname(os.path.abspath(__file__))
+PROFILE_PATH = os.path.join(_SRC, "..", "docs", "profile.md")
 
 TEMPLATES = {
     "ats-friendly": {
@@ -94,17 +96,35 @@ def run(template_name, layout, jd_source=None):
             pdf_paths[lyt] = pdf_result
 
         if not docx_done:
-            docx_mod = load_module(docx_gen_path)
-            docx_path = docx_mod.build(content)
+            try:
+                docx_mod = load_module(docx_gen_path)
+                docx_path = docx_mod.build(content)
+            except Exception as exc:
+                print(f"  [warn] DOCX generation failed: {exc}")
+                docx_path = None
             docx_done = True
 
-    # One review per run, based on the DOCX (PDFs are layout renders of the same content)
+    # Start review concurrently with any remaining PDF work (saves 60-120s vs. sequential)
     review_path = None
+    review_future = None
+    tracker_notes = ""
     if docx_path:
+        executor = ThreadPoolExecutor(max_workers=1)
+        review_future = executor.submit(
+            reviewer.review, content, jd_text, docx_path, layouts_to_run
+        )
+    else:
+        tracker_notes = "review skipped: DOCX generation failed"
+
+    # Wait for review to finish and collect result
+    if review_future:
         try:
-            review_path = reviewer.review(content, jd_text, docx_path, layouts_to_run)
+            review_path = review_future.result()
         except Exception as exc:
             print(f"  [warn] Review generation failed: {exc}")
+            tracker_notes = f"review skipped: {exc}"
+        finally:
+            executor.shutdown(wait=False)
 
     # Log to job application tracker (JD-tailored runs only)
     if jd_source and content and content.get("meta"):
@@ -119,6 +139,7 @@ def run(template_name, layout, jd_source=None):
                 pdf_2col=pdf_paths.get("2col", ""),
                 docx=docx_path or "",
                 review_path=review_path or "",
+                notes=tracker_notes,
             )
         except Exception as exc:
             print(f"  [warn] Job tracker update failed: {exc}")
